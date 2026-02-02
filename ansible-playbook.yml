@@ -1,0 +1,85 @@
+---
+# -------------------------------------------------------------------
+# This file is an Ansible Playbook
+# Ansible playbooks are written in YAML
+#
+# YAML basics:
+# - Indentation matters (spaces only, no tabs)
+# - Key : value format
+# - Dash (-) means "this is an item in a list"
+#
+# In Ansible:
+# - A playbook = list of plays
+# - A play = targets hosts and runs tasks on them
+# -------------------------------------------------------------------
+
+- name: Learn Ansible basics by managing nginx
+  hosts: all
+
+  # become: true means:
+  # - Ansible logs in as a normal user
+  # - Then uses sudo to run tasks as root
+  # - Required for installing packages and managing services
+  become: true
+
+  tasks:
+
+    # ===============================================================
+    # APPROACH 1: SHELL APPROACH (IMPERATIVE STYLE)
+    # ===============================================================
+    # This approach is similar to writing a bash script.
+    # You tell the system EXACTLY WHAT COMMAND to run.
+    #
+    # Use this approach ONLY when:
+    # - There is no Ansible module available
+    # - You need a very custom or one-off command
+    #
+    # Problems with shell approach:
+    # - Not idempotent (running again may repeat work)
+    # - Ansible does not know the system state
+    # - Harder to maintain at scale
+    # ===============================================================
+
+    - name: Install nginx using shell command (learning example)
+      shell: apt install -y nginx
+      # -y automatically answers "yes" to prompts
+      tags:
+        - shell_example
+
+    - name: Start nginx service using shell command (learning example)
+      shell: systemctl start nginx
+      tags:
+        - shell_example
+
+
+    # ===============================================================
+    # APPROACH 2: MODULE APPROACH (DECLARATIVE STYLE)
+    # ===============================================================
+    # This is the RECOMMENDED Ansible way.
+    #
+    # Instead of giving commands, you describe the FINAL STATE:
+    # - "nginx should be installed"
+    # - "nginx service should be running"
+    #
+    # Ansible figures out HOW to reach that state.
+    #
+    # Benefits:
+    # - Idempotent (safe to run again and again)
+    # - Cleaner syntax
+    # - Ansible understands success/failure properly
+    # ===============================================================
+
+    - name: Install nginx using apt module (recommended)
+      apt:
+        name: nginx            # package name
+        state: present         # ensure package is installed
+        update_cache: true     # similar to running apt update
+      tags:
+        - module_example
+
+    - name: Ensure nginx service is running using service module
+      service:
+        name: nginx            # service name
+        state: started         # ensure service is running
+      tags:
+        - module_example
